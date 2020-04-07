@@ -1,0 +1,17 @@
+####################################################################################
+## Copyright 2021 (c) Analog Devices, Inc.
+## Auto-generated, do not modify!
+####################################################################################
+
+LIBRARY_NAME := axi_ltc2387
+
+GENERIC_DEPS += ../common/ad_rst.v
+GENERIC_DEPS += ../common/up_axi.v
+GENERIC_DEPS += axi_ltc2387.v
+GENERIC_DEPS += axi_ltc2387_if.v
+GENERIC_DEPS += axi_ltc2387_ip.tcl
+
+XILINX_DEPS += ../xilinx/common/ad_data_clk.v
+XILINX_DEPS += ../xilinx/common/ad_rst_constr.xdc
+
+include ../scripts/library.mk
