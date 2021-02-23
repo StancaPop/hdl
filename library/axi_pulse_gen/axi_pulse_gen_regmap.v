@@ -231,13 +231,14 @@ module axi_pulse_gen_regmap #(
       .out_data (pulse_width));
 
     sync_data #(
-      .NUM_OF_BITS (96),
+      .NUM_OF_BITS (128),
       .ASYNC_CLK (1))
     i_pulse_offset_sync (
       .in_clk (up_clk),
       .in_data ({up_pulse_offset_3,
                  up_pulse_offset_2,
-                 up_pulse_offset_1}),
+                 up_pulse_offset_1,
+                 32'd0}),
       .out_clk (clk_out),
       .out_data (pulse_offset));
 
