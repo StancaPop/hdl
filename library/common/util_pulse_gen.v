@@ -45,7 +45,6 @@ module util_pulse_gen #(
   input       [31:0]  pulse_width,
   input       [31:0]  pulse_period,
   input               load_config,
-  input               phase_sync_active,
   input               sync,
 
   output  reg         pulse,
@@ -90,7 +89,7 @@ module util_pulse_gen #(
 
   always @(posedge clk) begin
     if (rstn == 1'b0 || load_config == 1'b1) begin
-      phase_align_armed <= phase_sync_active;
+      phase_align_armed <= sync;
     end else begin
       phase_align_armed <= phase_align_armed & sync;
     end

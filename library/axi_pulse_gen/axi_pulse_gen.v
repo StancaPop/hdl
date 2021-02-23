@@ -38,7 +38,7 @@ module axi_pulse_gen #(
 
   parameter       ID = 0,
   parameter [0:0] ASYNC_CLK_EN = 1,
-  parameter       N_PULSES = 3,
+  parameter       N_PULSES = 4,
   parameter       PULSE_0_WIDTH = 7,
   parameter       PULSE_1_WIDTH = 7,
   parameter       PULSE_2_WIDTH = 7,
@@ -108,7 +108,9 @@ module axi_pulse_gen #(
   wire   [127:0]  pulse_offset_s;
   wire    [31:0]  pulse_counter[0:N_PULSES-1];
   wire            sync[0:N_PULSES-1];
-  wire            phase_sync_active[0:N_PULSES-1];
+  wire            sync_active_1;
+  wire            sync_active_2;
+  wire            sync_active_3;
   wire            load_config_s;
   wire            pulse_gen_resetn;
 
@@ -161,12 +163,10 @@ module axi_pulse_gen #(
       .pulse_period (pulse_period_s[31:0]),
       .load_config (load_config_s),
       .sync (sync[0]),
-      .phase_sync_active (phase_sync_active[0]),
       .pulse (pulse_0),
       .pulse_counter (pulse_counter[0]));
 
       assign sync[0] = PULSE_0_EXT_SYNC == 1 ? external_sync : 1'b0;
-      assign phase_sync_active[0] = PULSE_0_EXT_SYNC[0];
 
   generate
     if (N_PULSES >= 2) begin
@@ -180,12 +180,13 @@ module axi_pulse_gen #(
         .pulse_period (pulse_period_s[63:32]),
         .load_config (load_config_s),
         .sync (sync[1]),
-        .phase_sync_active (phase_sync_active[1]),
         .pulse (pulse_1),
         .pulse_counter (pulse_counter[1]));
 
-      assign sync[1] = ((pulse_counter[0] == pulse_offset_s[63:32])) ? 1'b0 : 1'b1;
-      assign phase_sync_active[1] = |pulse_offset_s[63:32];
+      assign sync[1] = sync_active_1 ?
+                       (pulse_counter[0] == pulse_offset_s[63:32]) ?
+                       1'b0 : 1'b1 : 1'b0;
+      assign sync_active_1 = |pulse_offset_s[63:32];
     end else begin
       assign pulse_1 = 1'b0;
     end
@@ -201,12 +202,13 @@ module axi_pulse_gen #(
         .pulse_period (pulse_period_s[95:64]),
         .load_config (load_config_s),
         .sync (sync[2]),
-        .phase_sync_active (phase_sync_active[2]),
         .pulse (pulse_2),
         .pulse_counter (pulse_counter[2]));
 
-      assign sync[2] = ((pulse_counter[0] == pulse_offset_s[95:64])) ? 1'b0 : 1'b1;
-      assign phase_sync_active[2] = |pulse_offset_s[95:64];
+      assign sync[2] = sync_active_2 ?
+                      (pulse_counter[0] == pulse_offset_s[95:64]) ?
+                      1'b0 : 1'b1 : 1'b0;
+      assign sync_active_2 = |pulse_offset_s[95:64];
     end else begin
       assign pulse_2 = 1'b0;
     end
@@ -222,12 +224,13 @@ module axi_pulse_gen #(
         .pulse_period (pulse_period_s[127:96]),
         .load_config (load_config_s),
         .sync (sync[3]),
-        .phase_sync_active (phase_sync_active[3]),
         .pulse (pulse_3),
         .pulse_counter (pulse_counter[3]));
 
-      assign sync[3] = ((pulse_counter[0] == pulse_offset_s[127:96])) ? 1'b0 : 1'b1;
-      assign phase_sync_active[3] = |pulse_offset_s[127:96];
+      assign sync[3] = sync_active_3 ?
+                      (pulse_counter[0] == pulse_offset_s[127:96]) ?
+                      1'b0 : 1'b1 : 1'b0;
+      assign sync_active_3 = |pulse_offset_s[127:96];
     end else begin
       assign pulse_3 = 1'b0;
     end
