@@ -40,8 +40,19 @@ module axi_pulse_gen_regmap #(
   parameter [31:0] CORE_MAGIC = 0,
   parameter [31:0] CORE_VERSION = 0,
   parameter [ 0:0] ASYNC_CLK_EN = 1,
-  parameter        PULSE_WIDTH = 7,
-  parameter        PULSE_PERIOD = 10 )(
+  parameter        N_PULSES = 3,
+  parameter        PULSE_0_WIDTH = 7,
+  parameter        PULSE_1_WIDTH = 7,
+  parameter        PULSE_2_WIDTH = 7,
+  parameter        PULSE_3_WIDTH = 7,
+  parameter        PULSE_0_PERIOD = 10,
+  parameter        PULSE_1_PERIOD = 10,
+  parameter        PULSE_2_PERIOD = 10,
+  parameter        PULSE_3_PERIOD = 10,
+  parameter        PULSE_0_EXT_SYNC = 0,
+  parameter        PULSE_1_OFFSET = 0,
+  parameter        PULSE_2_OFFSET = 0,
+  parameter        PULSE_3_OFFSET = 0)(
 
   // external clock
 
@@ -51,8 +62,9 @@ module axi_pulse_gen_regmap #(
 
   output                  clk_out,
   output                  pulse_gen_resetn,
-  output      [31:0]      pulse_width,
-  output      [31:0]      pulse_period,
+  output     [127:0]      pulse_width,
+  output     [127:0]      pulse_period,
+  output     [127:0]      pulse_offset,
   output                  load_config,
 
   // processor interface
@@ -72,8 +84,17 @@ module axi_pulse_gen_regmap #(
   // internal registers
 
   reg     [31:0]  up_scratch = 'd0;
-  reg     [31:0]  up_pulse_width = 'd0;
-  reg     [31:0]  up_pulse_period = 'd0;
+  reg     [31:0]  up_pulse_width_0 = PULSE_0_WIDTH;
+  reg     [31:0]  up_pulse_width_1 = PULSE_1_WIDTH;
+  reg     [31:0]  up_pulse_width_2 = PULSE_2_WIDTH;
+  reg     [31:0]  up_pulse_width_3 = PULSE_3_WIDTH;
+  reg     [31:0]  up_pulse_period_0 = PULSE_0_PERIOD;
+  reg     [31:0]  up_pulse_period_1 = PULSE_1_PERIOD;
+  reg     [31:0]  up_pulse_period_2 = PULSE_2_PERIOD;
+  reg     [31:0]  up_pulse_period_3 = PULSE_3_PERIOD;
+  reg     [31:0]  up_pulse_offset_1 = PULSE_1_OFFSET;
+  reg     [31:0]  up_pulse_offset_2 = PULSE_2_OFFSET;
+  reg     [31:0]  up_pulse_offset_3 = PULSE_3_OFFSET;
   reg             up_load_config = 1'b0;
   reg             up_reset;
 
@@ -81,8 +102,17 @@ module axi_pulse_gen_regmap #(
     if (up_rstn == 0) begin
       up_wack <= 'd0;
       up_scratch <= 'd0;
-      up_pulse_period <= PULSE_PERIOD;
-      up_pulse_width <= PULSE_WIDTH;
+      up_pulse_width_0 <= PULSE_0_WIDTH;
+      up_pulse_width_1 <= PULSE_1_WIDTH;
+      up_pulse_width_2 <= PULSE_2_WIDTH;
+      up_pulse_width_3 <= PULSE_3_WIDTH;
+      up_pulse_period_0 <= PULSE_0_PERIOD;
+      up_pulse_period_1 <= PULSE_1_PERIOD;
+      up_pulse_period_2 <= PULSE_2_PERIOD;
+      up_pulse_period_3 <= PULSE_3_PERIOD;
+      up_pulse_offset_1 <= PULSE_1_OFFSET;
+      up_pulse_offset_2 <= PULSE_2_OFFSET;
+      up_pulse_offset_3 <= PULSE_3_OFFSET;
       up_load_config <= 1'b0;
       up_reset <= 1'b1;
     end else begin
@@ -97,10 +127,37 @@ module axi_pulse_gen_regmap #(
         up_load_config <= 1'b0;
       end
       if ((up_wreq == 1'b1) && (up_waddr == 14'h5)) begin
-        up_pulse_period <= up_wdata;
+        up_pulse_period_0 <= up_wdata;
       end
       if ((up_wreq == 1'b1) && (up_waddr == 14'h6)) begin
-        up_pulse_width <= up_wdata;
+        up_pulse_width_0 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'h8)) begin
+        up_pulse_period_1 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'h9)) begin
+        up_pulse_width_1 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'ha)) begin
+        up_pulse_offset_1 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'hb)) begin
+        up_pulse_period_2 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'hc)) begin
+        up_pulse_width_2 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'hd)) begin
+        up_pulse_offset_2 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'he)) begin
+        up_pulse_period_3 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'hf)) begin
+        up_pulse_width_3 <= up_wdata;
+      end
+      if ((up_wreq == 1'b1) && (up_waddr == 14'h10)) begin
+        up_pulse_offset_3 <= up_wdata;
       end
     end
   end
@@ -118,8 +175,18 @@ module axi_pulse_gen_regmap #(
           14'h2: up_rdata <= up_scratch;
           14'h3: up_rdata <= CORE_MAGIC;
           14'h4: up_rdata <= up_reset;
-          14'h5: up_rdata <= up_pulse_period;
-          14'h6: up_rdata <= up_pulse_width;
+          14'h5: up_rdata <= up_pulse_period_0;
+          14'h6: up_rdata <= up_pulse_width_0;
+          14'h7: up_rdata <= N_PULSES;
+          14'h8: up_rdata <= up_pulse_period_1;
+          14'h9: up_rdata <= up_pulse_width_1;
+          14'hA: up_rdata <= up_pulse_offset_1;
+          14'hB: up_rdata <= up_pulse_period_2;
+          14'hC: up_rdata <= up_pulse_width_2;
+          14'hD: up_rdata <= up_pulse_offset_2;
+          14'hE: up_rdata <= up_pulse_period_3;
+          14'hF: up_rdata <= up_pulse_width_3;
+          14'h10: up_rdata <= up_pulse_offset_3;
           default: up_rdata <= 0;
         endcase
       end else begin
@@ -140,22 +207,39 @@ module axi_pulse_gen_regmap #(
       .rst ());
 
     sync_data #(
-      .NUM_OF_BITS (32),
+      .NUM_OF_BITS (128),
       .ASYNC_CLK (1))
     i_pulse_period_sync (
       .in_clk (up_clk),
-      .in_data (up_pulse_period),
+      .in_data ({up_pulse_period_3,
+                 up_pulse_period_2,
+                 up_pulse_period_1,
+                 up_pulse_period_0}),
       .out_clk (clk_out),
       .out_data (pulse_period));
 
     sync_data #(
-      .NUM_OF_BITS (32),
+      .NUM_OF_BITS (128),
       .ASYNC_CLK (1))
     i_pulse_width_sync (
       .in_clk (up_clk),
-      .in_data (up_pulse_width),
+      .in_data ({up_pulse_width_3,
+                 up_pulse_width_2,
+                 up_pulse_width_1,
+                 up_pulse_width_0}),
       .out_clk (clk_out),
       .out_data (pulse_width));
+
+    sync_data #(
+      .NUM_OF_BITS (96),
+      .ASYNC_CLK (1))
+    i_pulse_offset_sync (
+      .in_clk (up_clk),
+      .in_data ({up_pulse_offset_3,
+                 up_pulse_offset_2,
+                 up_pulse_offset_1}),
+      .out_clk (clk_out),
+      .out_data (pulse_offset));
 
     sync_event #(
       .NUM_OF_EVENTS (1),
@@ -170,8 +254,9 @@ module axi_pulse_gen_regmap #(
 
     assign clk_out = up_clk;
     assign pulse_gen_resetn = ~up_reset;
-    assign pulse_period = up_pulse_period;
-    assign pulse_width = up_pulse_width;
+    assign pulse_period = {up_pulse_period_3, up_pulse_period_2, up_pulse_period_1, up_pulse_period_0};
+    assign pulse_width = {up_pulse_width_3, up_pulse_width_2, up_pulse_width_1, up_pulse_width_0};
+    assign pulse_offset = {up_pulse_offset_3, up_pulse_offset_2, up_pulse_offset_1, 32'd0};
     assign load_config = up_load_config;
 
   end
