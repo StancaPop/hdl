@@ -72,6 +72,13 @@ set_property -dict [list \
   "widget" "checkBox" \
 ] [ipgui::get_guiparamspec -name "ASYNC_CLK_EN" -component $cc]
 
+ipgui::add_param -name "EXT_ASYNC_SYNC" -component $cc -parent $page0
+set_property -dict [list \
+  "display_name" "External sync signal for pulse_0 is asynchronous" \
+  "tooltip" "NOTE: If active the external_sync will be delayed 2 clock cycles." \
+  "widget" "checkBox" \
+] [ipgui::get_guiparamspec -name "EXT_ASYNC_SYNC" -component $cc]
+
 ipgui::add_param -name "N_PULSES" -component $cc -parent $page0
 set_property -dict [list \
   "display_name" "Number of pulses" \
