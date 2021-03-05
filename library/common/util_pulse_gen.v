@@ -88,10 +88,14 @@ module util_pulse_gen #(
   // phase align to the first sync pulse until another load_config
 
   always @(posedge clk) begin
-    if (rstn == 1'b0 || load_config == 1'b1) begin
-      phase_align_armed <= sync;
+    if (rstn == 1'b0) begin
+      phase_align_armed <= 1'b0;
     end else begin
-      phase_align_armed <= phase_align_armed & sync;
+      if (load_config == 1'b1) begin
+        phase_align_armed <= sync;
+      end else begin
+        phase_align_armed <= phase_align_armed & sync;
+      end
     end
   end
 
