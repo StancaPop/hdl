@@ -74,7 +74,7 @@ module axi_ltc2387_if #(
   reg      [WIDTH-1:0]    adc_data_da_n = 'b0;
   reg      [WIDTH-1:0]    adc_data_db_p = 'b0;
   reg      [WIDTH-1:0]    adc_data_db_n = 'b0;
-  reg      [1:0]          clk_gate_d = 1'b0;
+  reg      [1:0]          clk_gate_d = 2'b0;
 
   always @(posedge clk) begin
     clk_gate_d <= {clk_gate_d, clk_gate};
@@ -107,16 +107,22 @@ module axi_ltc2387_if #(
         assign adc_data_int[2*i+1:2*i] = {adc_data_da_p[i], adc_data_da_n[i]};
       end else begin
         assign adc_data_int[4*i+3:4*i] = {adc_data_da_p[i], adc_data_db_p[i],
-		                                  adc_data_da_n[i], adc_data_db_n[i]};
+		                          adc_data_da_n[i], adc_data_db_n[i]};
       end
     end
   endgenerate
 
  generate
-    if (!TWOLANES) begin
+    if (RESOLUTION == 16) begin
       assign adc_data = adc_data_int[RESOLUTION-1:0];
     end else begin
-      assign adc_data = adc_data_int[RESOLUTION+1:2];
+    if (RESOLUTION == 18) begin
+      if (!TWOLANES) begin
+        assign adc_data = adc_data_int[RESOLUTION-1:0];
+      end else begin
+        assign adc_data = adc_data_int[RESOLUTION+1:2];
+      end	
+      end
     end
   endgenerate
 
