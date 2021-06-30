@@ -1,7 +1,5 @@
 
 create_bd_intf_port -mode Master -vlnv analog.com:interface:spi_master_rtl:1.0 pulsar_adc_spi
-create_bd_port -dir O pulsar_adc_spi_cnv
-create_bd_port -dir I pulsar_adc_spi_busy
 
 source $ad_hdl_dir/library/spi_engine/scripts/spi_engine.tcl
 

@@ -148,8 +148,6 @@ module system_top (
     .spi1_sdi_i (1'b0),
     .spi1_sdo_i (1'b0),
     .spi1_sdo_o (),
-    .pulsar_adc_spi_busy(),
-    .pulsar_adc_spi_cnv(),
     .pulsar_adc_spi_cs(pulsar_adc_spi_cs),
     .pulsar_adc_spi_sclk(pulsar_adc_spi_sclk),
     .pulsar_adc_spi_sdi(pulsar_adc_spi_sdi),
